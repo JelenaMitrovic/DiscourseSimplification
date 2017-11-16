@@ -31,6 +31,7 @@ import org.lambda3.text.simplification.discourse.utils.words.WordsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -38,6 +39,7 @@ import java.util.List;
 public class Element {
     private String id;
     private Tree parseTree;
+    private String translatedText; // optional
     private int sentenceIdx;
     private int contextLayer;
     private List<SimpleContext> simpleContexts;
@@ -50,6 +52,7 @@ public class Element {
     public Element(Tree parseTree, int sentenceIdx, int contextLayer) {
         this.id = IDGenerator.generateUUID();
         this.parseTree = parseTree;
+        this.translatedText = null;
         this.sentenceIdx = sentenceIdx;
         this.contextLayer = contextLayer;
         this.simpleContexts = new ArrayList<>();
@@ -87,6 +90,14 @@ public class Element {
 
     public String getText() {
         return WordsUtils.wordsToString(ParseTreeExtractionUtils.getContainingWords(parseTree));
+    }
+
+    public void setTranslatedText(String translatedText) {
+        this.translatedText = translatedText;
+    }
+
+    public Optional<String> getTranslatedText() {
+        return Optional.ofNullable(translatedText);
     }
 
     public int getSentenceIdx() {

@@ -26,7 +26,7 @@
 
     <groupId>org.lambda3.text.simplification</groupId>
     <artifactId>discourse-simplification</artifactId>
-    <version>8.0.0</version>
+    <version>9.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Discourse Simplification</name>
@@ -44,6 +44,8 @@
         <jackson.version>2.8.8</jackson.version>
 
         <simplification.version>5.0.0</simplification.version>
+        <geofluent.version>0.2.0</geofluent.version>
+
 
         <corenlp.version>3.7.0</corenlp.version>
         <logback.version>1.1.8</logback.version>
@@ -89,17 +91,22 @@
             <version>${simplification.version}</version>
         </dependency>
 
-        <!-- Stanford NLP -->
+        <!-- Translation Service -->
         <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>${corenlp.version}</version>
+            <groupId>io.redlink.ssix.geofluent</groupId>
+            <artifactId>geofluent-java</artifactId>
+            <version>${geofluent.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
         </dependency>
 
         <!-- Logging -->

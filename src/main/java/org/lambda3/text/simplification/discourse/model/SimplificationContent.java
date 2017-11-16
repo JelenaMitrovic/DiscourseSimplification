@@ -69,13 +69,17 @@ public class SimplificationContent extends Content {
         for (OutSentence outSentence : getSentences()) {
             strb.append("\n# " + outSentence.getOriginalSentence() + "\n");
             for (Element element : outSentence.getElements()) {
-                strb.append("\n" + element.getId() + "\t" + element.getContextLayer() + "\t" + element.getText() + "\n");
+                String text = element.getTranslatedText().orElse(element.getText());
+                strb.append("\n" + element.getId() + "\t" + element.getContextLayer() + "\t" + text + "\n");
                 for (SimpleContext simpleContext : element.getSimpleContexts()) {
-                    strb.append("\t" + "S:" + simpleContext.getRelation() + "\t" + simpleContext.getText() + "\n");
+                    String cText = simpleContext.getTranslatedText().orElse(simpleContext.getText());
+                    strb.append("\t" + "S:" + simpleContext.getRelation() + "\t" + cText + "\n");
                 }
                 for (LinkedContext linkedContext : element.getLinkedContexts()) {
                     if (resolve) {
-                        strb.append("\t" + "L:" + linkedContext.getRelation() + "\t" + getElement(linkedContext.getTargetID()).getText() + "\n");
+                        Element target = getElement(linkedContext.getTargetID());
+                        String targetText = target.getTranslatedText().orElse(target.getText());
+                        strb.append("\t" + "L:" + linkedContext.getRelation() + "\t" + targetText+ "\n");
                     } else {
                         strb.append("\t" + "L:" + linkedContext.getRelation() + "\t" + linkedContext.getTargetID() + "\n");
                     }
@@ -90,13 +94,17 @@ public class SimplificationContent extends Content {
         StringBuilder strb = new StringBuilder();
         for (OutSentence outSentence : getSentences()) {
             for (Element element : outSentence.getElements()) {
-                strb.append(outSentence.getOriginalSentence() + "\t" + element.getId() + "\t" + element.getContextLayer() + "\t" + element.getText());
+                String text = element.getTranslatedText().orElse(element.getText());
+                strb.append(outSentence.getOriginalSentence() + "\t" + element.getId() + "\t" + element.getContextLayer() + "\t" + text);
                 for (SimpleContext simpleContext : element.getSimpleContexts()) {
-                    strb.append("\t" + "S:" + simpleContext.getRelation() + "(" + simpleContext.getText() + ")");
+                    String cText = simpleContext.getTranslatedText().orElse(simpleContext.getText());
+                    strb.append("\t" + "S:" + simpleContext.getRelation() + "(" + cText + ")");
                 }
                 for (LinkedContext linkedContext : element.getLinkedContexts()) {
                     if (resolve) {
-                        strb.append("\t" + "L:" + linkedContext.getRelation() + "(" + getElement(linkedContext.getTargetID()).getText() + ")");
+                        Element target = getElement(linkedContext.getTargetID());
+                        String targetText = target.getTranslatedText().orElse(target.getText());
+                        strb.append("\t" + "L:" + linkedContext.getRelation() + "(" + targetText + ")");
                     } else {
                         strb.append("\t" + "L:" + linkedContext.getRelation() + "(" + linkedContext.getTargetID() + ")");
                     }

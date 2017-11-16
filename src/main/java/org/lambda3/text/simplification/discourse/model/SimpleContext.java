@@ -38,6 +38,7 @@ public class SimpleContext {
     private static final Pattern ATTRIBUTION_PHRASE_PATTERN = Pattern.compile("^\\W*this\\W+\\w+\\W+what\\W+(?<phrase>.*\\w+.*)$", Pattern.CASE_INSENSITIVE);
 
     private Tree parseTree;
+    private String translatedText; // optional
     private Tree phrase;
     private Relation relation;
     private TimeInformation timeInformation; // optional
@@ -48,6 +49,7 @@ public class SimpleContext {
 
     public SimpleContext(Tree parseTree) {
         this.parseTree = parseTree;
+        this.translatedText = null;
         this.relation = Relation.UNKNOWN;
         this.timeInformation = null;
         extractPhrase();
@@ -69,6 +71,14 @@ public class SimpleContext {
 
     public String getText() {
         return WordsUtils.wordsToString(ParseTreeExtractionUtils.getContainingWords(parseTree));
+    }
+
+    public void setTranslatedText(String translatedText) {
+        this.translatedText = translatedText;
+    }
+
+    public Optional<String> getTranslatedText() {
+        return Optional.ofNullable(translatedText);
     }
 
     private void extractPhrase() {

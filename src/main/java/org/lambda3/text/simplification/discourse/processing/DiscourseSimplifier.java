@@ -30,6 +30,7 @@ import org.lambda3.text.simplification.discourse.model.OutSentence;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.DiscourseTreeCreator;
 import org.lambda3.text.simplification.discourse.model.SimplificationContent;
 import org.lambda3.text.simplification.discourse.runner.sentence_simplification.SentenceSimplifier;
+import org.lambda3.text.simplification.discourse.translation.GeofluentTranslator;
 import org.lambda3.text.simplification.discourse.utils.ConfigUtils;
 import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeException;
 import org.lambda3.text.simplification.discourse.utils.sentences.SentencesUtils;
@@ -38,8 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -48,6 +51,8 @@ public class DiscourseSimplifier {
     private final DiscourseTreeCreator discourseTreeCreator;
     private final DiscourseExtractor discourseExtractor;
     private final SentenceSimplifier sentenceSimplifier;
+    private final GeofluentTranslator translator;
+    private final boolean translate;
     private final boolean withSentenceSimplification;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -55,7 +60,9 @@ public class DiscourseSimplifier {
         this.discourseTreeCreator = new DiscourseTreeCreator(config);
         this.discourseExtractor = new DiscourseExtractor(config);
         this.sentenceSimplifier = new SentenceSimplifier(config);
+        this.translator = new GeofluentTranslator(config);
 
+        this.translate = config.getBoolean("translator.geofluent.active");
         this.withSentenceSimplification = config.getBoolean("with-sentence-simplification");
 
         logger.debug("DiscourseSimplifier initialized");
@@ -77,13 +84,31 @@ public class DiscourseSimplifier {
     }
 
     public SimplificationContent doDiscourseSimplification(List<String> sentences, ProcessingType type) {
+        List<String> sents = sentences;
+
+        // translate to english
+        if (translate) {
+            sents = sentences.stream().map(s -> translator.doTranslate(s, false)).collect(Collectors.toList());
+        }
+
+        SimplificationContent sc;
         if (type.equals(ProcessingType.SEPARATE)) {
-            return processSeparate(sentences);
+            sc = processSeparate(sents);
         } else if (type.equals(ProcessingType.WHOLE)) {
-            return processWhole(sentences);
+            sc = processWhole(sents);
         } else {
             throw new IllegalArgumentException("Unknown ProcessingType.");
         }
+
+        // translate back
+        if (translate) {
+            for (Element element : sc.getElements()) {
+                element.setTranslatedText(translator.doTranslate(element.getText(), true));
+                element.getSimpleContexts().forEach(c -> c.setTranslatedText(translator.doTranslate(c.getText(), true)));
+            }
+        }
+
+        return sc;
     }
 
     // creates one discourse discourse_tree over all sentences (investigates intra-sentential and inter-sentential relations)
