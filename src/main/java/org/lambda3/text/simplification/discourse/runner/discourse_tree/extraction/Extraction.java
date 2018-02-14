@@ -22,13 +22,9 @@
 
 package org.lambda3.text.simplification.discourse.runner.discourse_tree.extraction;
 
-import edu.stanford.nlp.ling.Word;
+import org.lambda3.text.simplification.discourse.model.SimpleContext;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.Relation;
-import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.Coordination;
-import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.DiscourseTree;
-import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.Leaf;
-import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.Subordination;
-import org.lambda3.text.simplification.discourse.utils.words.WordsUtils;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,10 +39,21 @@ public class Extraction {
     private boolean referring;
     private String cuePhrase; // optional
     private Relation relation;
-    private boolean contextRight; // only for subordinate relations
+    private boolean contextRight;
     private List<Leaf> constituents;
 
-    public Extraction(String extractionRule, boolean referring, List<Word> cuePhraseWords, Relation relation, boolean contextRight, List<Leaf> constituents) {
+    /***
+     *
+     * Creates a new extraction
+     *
+     * @param extractionRule The name of the extraction rule.
+     * @param referring True, if the sentence refers to the previous unit. This requires the sentence to be the only constituent.
+     * @param cuePhrase The cue phrase that indicates the relation. Can be null.
+     * @param relation The classified relation.
+     * @param contextRight In case of a subordination: is the right constituent contextual (True) or the left one (False).
+     * @param constituents The (simplified) sentences.
+     */
+    public Extraction(String extractionRule, boolean referring, String cuePhrase, Relation relation, boolean contextRight, List<Leaf> constituents) {
         if ((referring) && (constituents.size() != 1)) {
             throw new AssertionError("Referring relations should have one constituent");
         }
@@ -57,7 +64,7 @@ public class Extraction {
 
         this.extractionRule = extractionRule;
         this.referring = referring;
-        this.cuePhrase = (cuePhraseWords == null)? null : WordsUtils.wordsToString(cuePhraseWords);
+        this.cuePhrase = (cuePhrase == null)? null : cuePhrase;
         this.relation = relation;
         this.contextRight = contextRight;
         this.constituents = constituents;
@@ -79,7 +86,8 @@ public class Extraction {
                         extractionRule,
                         relation,
                         cuePhrase,
-                        Collections.emptyList()
+                        Collections.emptyList(),
+                        currChild.getSimpleContexts()
                     );
                     res.addCoordination(prevNode.get()); // set prev node as a reference
                     res.addCoordination(constituents.get(0));
@@ -91,7 +99,8 @@ public class Extraction {
                     extractionRule,
                     relation,
                     cuePhrase,
-                    constituents.stream().collect(Collectors.toList())
+                    constituents.stream().collect(Collectors.toList()),
+                    currChild.getSimpleContexts()
                 ));
             }
         } else {
@@ -108,9 +117,10 @@ public class Extraction {
                         extractionRule,
                         relation,
                         cuePhrase,
-                        new Leaf(), // tmp
+                        new TmpLeaf(), // tmp
                         constituents.get(0),
-                        contextRight
+                        contextRight,
+                        currChild.getSimpleContexts()
                     );
                     res.replaceLeftConstituent(prevNode.get()); // set prev node as a reference
 
@@ -123,7 +133,8 @@ public class Extraction {
                     cuePhrase,
                     constituents.get(0),
                     constituents.get(1),
-                    contextRight
+                    contextRight,
+                    currChild.getSimpleContexts()
                 ));
             }
         }

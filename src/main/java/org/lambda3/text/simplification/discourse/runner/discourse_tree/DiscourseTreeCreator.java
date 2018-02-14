@@ -28,7 +28,6 @@ import org.lambda3.text.simplification.discourse.runner.discourse_tree.extractio
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.extraction.ExtractionRule;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.*;
 import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeException;
-import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeVisualizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,7 @@ import java.util.Optional;
 /**
  *
  */
-public class DiscourseTreeCreator {
+public abstract class DiscourseTreeCreator {
     private final List<ExtractionRule> rules;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -58,7 +57,6 @@ public class DiscourseTreeCreator {
                 Class<?> clazz = Class.forName(className);
                 Constructor<?> constructor = clazz.getConstructor();
                 ExtractionRule rule = (ExtractionRule) constructor.newInstance();
-                rule.setConfig(config);
                 rules.add(rule);
             } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException | ClassNotFoundException e) {
                 logger.error("{}", e);
@@ -75,13 +73,15 @@ public class DiscourseTreeCreator {
                 "ROOT",
                 Relation.UNKNOWN_COORDINATION,
                 null,
+                new ArrayList<>(),
                 new ArrayList<>()
-
         );
     }
 
+    public abstract SentenceLeaf createSentenceLeaf(String sentence, int sentenceIdx) throws ParseTreeException;
+
     public void addSentence(String sentence, int sentenceIdx) throws ParseTreeException {
-        discourseTree.addCoordination(new SentenceLeaf(sentence, sentenceIdx));
+        discourseTree.addCoordination(createSentenceLeaf(sentence, sentenceIdx));
     }
 
     public DiscourseTree getLastSentenceTree() {
@@ -175,7 +175,7 @@ public class DiscourseTreeCreator {
 
         logger.debug("Process leaf:");
         if (logger.isDebugEnabled()) {
-            logger.debug(ParseTreeVisualizer.prettyPrint(leaf.getParseTree()));
+            logger.debug(leaf.printParseTree());
         }
 
         // check rules

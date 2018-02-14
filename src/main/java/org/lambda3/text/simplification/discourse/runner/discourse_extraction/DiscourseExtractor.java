@@ -24,6 +24,7 @@ package org.lambda3.text.simplification.discourse.runner.discourse_extraction;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
+import org.lambda3.text.simplification.discourse.model.SimpleContext;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.Relation;
 import org.lambda3.text.simplification.discourse.model.Element;
 import org.lambda3.text.simplification.discourse.model.LinkedContext;
@@ -31,7 +32,6 @@ import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.Coo
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.DiscourseTree;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.Leaf;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.Subordination;
-import org.lambda3.text.simplification.discourse.model.SimpleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,39 +76,35 @@ public class DiscourseExtractor {
         return processedLeaves.values().stream().collect(Collectors.toList());
     }
 
-    private void addAsContext(Leaf leaf, Leaf targetLeaf, Relation targetRelation) {
-        if (leaf.isToSimpleContext()) {
-            return;
-        }
+    private void AddAsLinkedContext(Leaf leaf, Leaf targetLeaf, Relation targetRelation) {
         Element leafElement = processedLeaves.get(leaf);
 
-        if (targetLeaf.isToSimpleContext()) {
-            // simple context
-            SimpleContext sc = new SimpleContext(targetLeaf.getParseTree());
-            sc.setRelation(targetRelation);
-            leafElement.addSimpleContext(sc);
-        } else {
-            // linked context
-            Element targetElement = processedLeaves.get(targetLeaf);
-            leafElement.addLinkedContext(new LinkedContext(targetElement.getId(), targetRelation));
-        }
+        // linked context
+        Element targetElement = processedLeaves.get(targetLeaf);
+        leafElement.addLinkedContext(new LinkedContext(targetElement.getId(), targetRelation));
+    }
+
+    private void addSimpleContexts(Leaf leaf, List<SimpleContext> simpleContexts) {
+        Element leafElement = processedLeaves.get(leaf);
+
+        // simple contexts
+        simpleContexts.forEach(sc -> leafElement.addSimpleContext(sc));
     }
 
     private void extractRec(DiscourseTree node, int contextLayer) {
 
         if (node instanceof Leaf) {
             Leaf leaf = (Leaf)node;
-            if (!leaf.isToSimpleContext()) {
 
-                // create new element
-                Element element = new Element(
-                        leaf.getParseTree(),
-                        leaf.getSentenceIdx(),
-                        contextLayer
-                );
+            // create new element
+            Element element = new Element(
+                    leaf.getText(),
+                    leaf.getSentenceIdx(),
+                    contextLayer
+            );
+            leaf.getSimpleContexts().forEach(sc -> element.addSimpleContext(sc));
 
-                processedLeaves.put(leaf, element);
-            }
+            processedLeaves.put(leaf, element);
         }
 
         if (node instanceof Coordination) {
@@ -119,7 +115,10 @@ public class DiscourseExtractor {
                 extractRec(child, contextLayer);
             }
 
-            // set relations
+            // set simple contexts
+            coordination.getLeaves().forEach(l -> addSimpleContexts(l, node.getSimpleContexts()));
+
+            // set links
             if (!ignoredRelations.contains(coordination.getRelation())) {
                 for (DiscourseTree child : coordination.getCoordinations()) {
                     List<Leaf> childNLeaves = child.getCorePathLeaves();
@@ -130,7 +129,7 @@ public class DiscourseExtractor {
 
                         for (Leaf childNLeaf : childNLeaves) {
                             for (Leaf siblingNLeaf : siblingNLeaves) {
-                                addAsContext(childNLeaf, siblingNLeaf, coordination.getRelation());
+                                AddAsLinkedContext(childNLeaf, siblingNLeaf, coordination.getRelation());
                             }
                         }
                     }
@@ -141,7 +140,7 @@ public class DiscourseExtractor {
 
                         for (Leaf childNLeaf : childNLeaves) {
                             for (Leaf siblingNLeaf : siblingNLeaves) {
-                                addAsContext(childNLeaf, siblingNLeaf, coordination.getRelation().getInverseRelation());
+                                AddAsLinkedContext(childNLeaf, siblingNLeaf, coordination.getRelation().getInverseRelation());
                             }
                         }
                     }
@@ -156,14 +155,17 @@ public class DiscourseExtractor {
             extractRec(subordination.getSuperordination(), contextLayer);
             extractRec(subordination.getSubordination(), contextLayer + 1);
 
-            // add relations
+            // set simple contexts
+            subordination.getLeaves().forEach(l -> addSimpleContexts(l, node.getSimpleContexts()));
+
+            // set links
             if (!ignoredRelations.contains(subordination.getRelation())) {
                 List<Leaf> superordinationNLeaves = subordination.getSuperordination().getCorePathLeaves();
                 List<Leaf> subordinationNLeaves = subordination.getSubordination().getCorePathLeaves();
 
                 for (Leaf superordinationNLeaf : superordinationNLeaves) {
                     for (Leaf subordinationNLeaf : subordinationNLeaves) {
-                        addAsContext(superordinationNLeaf, subordinationNLeaf, subordination.getRelation());
+                        AddAsLinkedContext(superordinationNLeaf, subordinationNLeaf, subordination.getRelation());
                     }
                 }
             }

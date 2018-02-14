@@ -22,35 +22,15 @@
 
 package org.lambda3.text.simplification.discourse.utils.sentences;
 
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.SentenceUtils;
-import edu.stanford.nlp.process.DocumentPreprocessor;
-
-import java.io.*;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
  *
  */
-public class SentencesUtils {
+public interface SentencesUtils {
 
-    private static List<String> splitIntoSentences(Reader reader) {
-        List<String> res = new ArrayList<>();
-
-        DocumentPreprocessor dp = new DocumentPreprocessor(reader);
-        for (List<HasWord> sentence : dp) {
-            res.add(SentenceUtils.listToString(sentence));
-        }
-
-        return res;
-    }
-
-    public static List<String> splitIntoSentences(String text) {
-        return splitIntoSentences(new StringReader(text));
-    }
-
-    public static List<String> splitIntoSentencesFromFile(File file) throws FileNotFoundException {
-        return splitIntoSentences(new BufferedReader(new FileReader(file)));
-    }
+    List<String> splitIntoSentences(String text);
+    List<String> splitIntoSentences(File file) throws IOException;
 }

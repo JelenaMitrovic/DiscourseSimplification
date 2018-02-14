@@ -1,8 +1,8 @@
 /*
  * ==========================License-Start=============================
- * DiscourseSimplification : PostListNPExtractor
+ * DiscourseSimplification : MySentencesUtils
  *
- * Copyright © 2017 Lambda³
+ * Copyright © 2018 Lambda³
  *
  * GNU General Public License 3
  * This program is free software: you can redistribute it and/or modify
@@ -20,14 +20,28 @@
  * ==========================License-End==============================
  */
 
-package org.lambda3.text.simplification.discourse.runner.discourse_tree.extraction.rules.ListNP;
+package org.lambda3.text.simplification.discourse.utils.sentences.impl;
 
-/**
- *
- */
-public class PostListNPExtractor extends ListNPExtractor {
+import org.lambda3.text.simplification.discourse.utils.sentences.SentencesUtils;
 
-    public PostListNPExtractor() {
-        super("ROOT <<: (S < (NP $.. (VP << (NP=np))))");
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+
+public class MySentencesUtils implements SentencesUtils {
+
+    @Override
+    public List<String> splitIntoSentences(String text) {
+        return Arrays.asList(text);
+    }
+
+    @Override
+    public List<String> splitIntoSentences(File file) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(file.getPath()));
+        
+        return lines;
     }
 }

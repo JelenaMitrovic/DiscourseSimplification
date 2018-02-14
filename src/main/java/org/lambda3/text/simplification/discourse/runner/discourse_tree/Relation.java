@@ -50,7 +50,7 @@ public enum Relation {
     TEMPORAL_AFTER,
     TEMPORAL_BEFORE,
 
-    // for sentence simplification
+    // for phrasal simplification
     NOUN_BASED,
     SPATIAL,
     TEMPORAL,

@@ -27,7 +27,7 @@ import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeExcept
 /**
  *
  */
-public class SentenceLeaf extends Leaf {
+public abstract class SentenceLeaf extends Leaf {
 
     public SentenceLeaf(String sentence, int sentenceIdx) throws ParseTreeException {
         super("SENTENCE", sentence);

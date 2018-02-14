@@ -1,8 +1,8 @@
 /*
  * ==========================License-Start=============================
- * DiscourseSimplification : ContextClassifier
+ * DiscourseSimplification : MyRule
  *
- * Copyright © 2017 Lambda³
+ * Copyright © 2018 Lambda³
  *
  * GNU General Public License 3
  * This program is free software: you can redistribute it and/or modify
@@ -20,13 +20,22 @@
  * ==========================License-End==============================
  */
 
-package org.lambda3.text.simplification.discourse.runner.sentence_simplification.classification;
+package org.lambda3.text.simplification.discourse.runner.discourse_tree.extraction.rules;
 
 import org.lambda3.text.simplification.discourse.model.SimpleContext;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.Relation;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.extraction.Extraction;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.extraction.ExtractionRule;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.Leaf;
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeException;
 
-/**
- *
- */
-public interface ContextClassifier {
-    void classify(SimpleContext simpleContext);
+import java.util.Optional;
+
+public class MyRule extends ExtractionRule {
+
+    @Override
+    public Optional<Extraction> extract(Leaf leaf) throws ParseTreeException {
+        leaf.addSimpleContext(new SimpleContext("Ich habe gesagt dass", Relation.ATTRIBUTION));
+        return Optional.empty();
+    }
 }

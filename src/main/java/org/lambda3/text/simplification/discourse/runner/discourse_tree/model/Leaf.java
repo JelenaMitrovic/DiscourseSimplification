@@ -22,74 +22,74 @@
 
 package org.lambda3.text.simplification.discourse.runner.discourse_tree.model;
 
-import edu.stanford.nlp.trees.Tree;
 import org.lambda3.text.simplification.discourse.utils.PrettyTreePrinter;
 import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeException;
 import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeExtractionUtils;
 import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeParser;
-import org.lambda3.text.simplification.discourse.utils.words.WordsUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
  */
-public class Leaf extends DiscourseTree {
-    private Tree parseTree;
+public abstract class Leaf<T> extends DiscourseTree {
+
+    private T parseTree;
     private boolean allowSplit; // true, if extraction-rules will be applied on the text
-    private boolean toSimpleContext;
 
     public Leaf() {
         super("UNKNOWN");
+        this.allowSplit = true;
     }
 
-    public Leaf(String extractionRule, Tree parseTree) {
+    public Leaf(String extractionRule, T parseTree) {
         super(extractionRule);
         this.parseTree = parseTree;
         this.allowSplit = true;
-        this.toSimpleContext = false;
     }
 
-    // not efficient -> prefer to use constructor with tree
+    // not efficient -> prefer to use constructor with parseTree
     public Leaf(String extractionRule, String text) throws ParseTreeException {
-        this(extractionRule, ParseTreeParser.parse(text));
+        super(extractionRule);
+        this.parseTree = getParseTreeParser().parse(text);
+        this.allowSplit = true;
     }
+
+    protected abstract ParseTreeParser<T> getParseTreeParser();
+    protected abstract ParseTreeExtractionUtils<T> getParseTreeExtractionUtils();
+
 
     public void dontAllowSplit() {
         this.allowSplit = false;
     }
 
-    public Tree getParseTree() {
+    public T getParseTree() {
         return parseTree;
     }
 
-    public void setParseTree(Tree parseTree) {
+    public String printParseTree() { return getParseTreeExtractionUtils().printParseTree(parseTree); }
+
+    public void setParseTree(T parseTree) {
         this.parseTree = parseTree;
     }
 
     public String getText() {
-        return WordsUtils.wordsToString(ParseTreeExtractionUtils.getContainingWords(parseTree));
-    }
-
-    public void setToSimpleContext(boolean toSimpleContext) {
-        this.toSimpleContext = toSimpleContext;
+        return getParseTreeExtractionUtils().getText(parseTree);
     }
 
     public boolean isAllowSplit() {
         return allowSplit;
     }
 
-    public boolean isToSimpleContext() {
-        return toSimpleContext;
-    }
-
     // VISUALIZATION ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public List<String> getPTPCaption() {
-        return Collections.singletonList("'" + getText() + "'");
+        String simpleContextsStr = "[" + simpleContexts.stream().map(c -> "'" + c.getText() + "':" + c.getRelation()).collect(Collectors.joining(", ")) + "]";
+        return Collections.singletonList("'" + getText() + "' " + simpleContextsStr);
     }
 
     @Override

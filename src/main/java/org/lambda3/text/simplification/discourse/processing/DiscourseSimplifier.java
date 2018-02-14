@@ -24,20 +24,22 @@ package org.lambda3.text.simplification.discourse.processing;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.lambda3.text.simplification.discourse.runner.discourse_extraction.DiscourseExtractor;
 import org.lambda3.text.simplification.discourse.model.Element;
 import org.lambda3.text.simplification.discourse.model.OutSentence;
-import org.lambda3.text.simplification.discourse.runner.discourse_tree.DiscourseTreeCreator;
 import org.lambda3.text.simplification.discourse.model.SimplificationContent;
-import org.lambda3.text.simplification.discourse.runner.sentence_simplification.SentenceSimplifier;
+import org.lambda3.text.simplification.discourse.runner.discourse_extraction.DiscourseExtractor;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.DiscourseTreeCreator;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.MyDiscourseTreeCreator;
 import org.lambda3.text.simplification.discourse.utils.ConfigUtils;
 import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeException;
 import org.lambda3.text.simplification.discourse.utils.sentences.SentencesUtils;
+import org.lambda3.text.simplification.discourse.utils.sentences.impl.MySentencesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,18 +47,15 @@ import java.util.Optional;
  *
  */
 public class DiscourseSimplifier {
+    private SentencesUtils sentencesUtils;
     private final DiscourseTreeCreator discourseTreeCreator;
     private final DiscourseExtractor discourseExtractor;
-    private final SentenceSimplifier sentenceSimplifier;
-    private final boolean withSentenceSimplification;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public DiscourseSimplifier(Config config) {
-        this.discourseTreeCreator = new DiscourseTreeCreator(config);
+        this.sentencesUtils = new MySentencesUtils();
+        this.discourseTreeCreator = new MyDiscourseTreeCreator(config);
         this.discourseExtractor = new DiscourseExtractor(config);
-        this.sentenceSimplifier = new SentenceSimplifier(config);
-
-        this.withSentenceSimplification = config.getBoolean("with-sentence-simplification");
 
         logger.debug("DiscourseSimplifier initialized");
         logger.debug("\n{}", ConfigUtils.prettyPrint(config));
@@ -66,13 +65,13 @@ public class DiscourseSimplifier {
         this(ConfigFactory.load().getConfig("discourse-simplification"));
     }
 
-    public SimplificationContent doDiscourseSimplification(File file, ProcessingType type) throws FileNotFoundException {
-        List<String> sentences = SentencesUtils.splitIntoSentencesFromFile(file);
+    public SimplificationContent doDiscourseSimplification(File file, ProcessingType type) throws IOException {
+        List<String> sentences = sentencesUtils.splitIntoSentences(file);
         return doDiscourseSimplification(sentences, type);
     }
 
     public SimplificationContent doDiscourseSimplification(String text, ProcessingType type) {
-        List<String> sentences = SentencesUtils.splitIntoSentences(text);
+        List<String> sentences = sentencesUtils.splitIntoSentences(text);
         return doDiscourseSimplification(sentences, type);
     }
 
@@ -126,17 +125,6 @@ public class DiscourseSimplifier {
             logger.debug(content.toString());
         }
 
-        // Step 3) do sentence simplification
-        logger.info("### STEP 3) DO SENTENCE SIMPLIFICATION ###");
-        if (withSentenceSimplification) {
-            content.getSentences().forEach(s -> sentenceSimplifier.doSentenceSimplification(s));
-            if (logger.isDebugEnabled()) {
-                logger.debug(content.toString());
-            }
-        } else {
-            logger.info("DEACTIVATED");
-        }
-
         logger.info("### FINISHED");
         return content;
     }
@@ -168,14 +156,6 @@ public class DiscourseSimplifier {
                 elements.forEach(e -> outSentence.addElement(e));
                 logger.debug(outSentence.toString());
 
-                // Step 3) do sentence simplification
-                logger.debug("### STEP 3) DO SENTENCE SIMPLIFICATION ###");
-                if (withSentenceSimplification) {
-                    sentenceSimplifier.doSentenceSimplification(outSentence);
-                    logger.debug(outSentence.toString());
-                } else {
-                    logger.info("DEACTIVATED");
-                }
             } catch (ParseTreeException e) {
                 logger.error("Failed to process sentence: {}", sentence);
             }

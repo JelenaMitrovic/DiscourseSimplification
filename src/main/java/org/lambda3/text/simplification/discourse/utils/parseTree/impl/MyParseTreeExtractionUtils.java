@@ -1,8 +1,8 @@
 /*
  * ==========================License-Start=============================
- * DiscourseSimplification : POSToken
+ * DiscourseSimplification : MyParseTreeExtractionUtils
  *
- * Copyright © 2017 Lambda³
+ * Copyright © 2018 Lambda³
  *
  * GNU General Public License 3
  * This program is free software: you can redistribute it and/or modify
@@ -20,35 +20,19 @@
  * ==========================License-End==============================
  */
 
-package org.lambda3.text.simplification.discourse.utils.pos;
+package org.lambda3.text.simplification.discourse.utils.parseTree.impl;
 
-/**
- *
- */
-public class POSToken {
-    private final int index;
-    private final String text;
-    private final String pos;
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeExtractionUtils;
 
-    public POSToken(int index, String text, String pos) {
-        this.index = index;
-        this.text = text;
-        this.pos = pos;
+public class MyParseTreeExtractionUtils implements ParseTreeExtractionUtils<Object> {
+
+    @Override
+    public String getText(Object parseTree) {
+        return (String)parseTree;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public String getPos() {
-        return pos;
-    }
-
-    public String toString() {
-        return "(" + index + ": " + pos + ", '" + text + "')";
+    @Override
+    public String printParseTree(Object parseTree) {
+        return (String)parseTree;
     }
 }

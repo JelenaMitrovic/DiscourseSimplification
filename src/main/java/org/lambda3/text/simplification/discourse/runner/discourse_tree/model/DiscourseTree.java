@@ -22,6 +22,7 @@
 
 package org.lambda3.text.simplification.discourse.runner.discourse_tree.model;
 
+import org.lambda3.text.simplification.discourse.model.SimpleContext;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.Relation;
 import org.lambda3.text.simplification.discourse.utils.PrettyTreePrinter;
 
@@ -34,15 +35,17 @@ public abstract class DiscourseTree implements PrettyTreePrinter.Node {
     DiscourseTree parent; //optional
     private boolean processed;
     private int sentenceIdx;
+    protected List<SimpleContext> simpleContexts;
 
     DiscourseTree(String extractionRule) {
         this.extractionRule = extractionRule;
         this.processed = false;
         this.parent = null; // should be set by inherited classes
         this.sentenceIdx = -1; // should be set by inherited classes
+        this.simpleContexts = new ArrayList<>();
     }
 
-    void setRecursiveUnsetSentenceIdx(int sentenceIdx) {
+    protected void setRecursiveUnsetSentenceIdx(int sentenceIdx) {
         if (this.sentenceIdx < 0) {
             this.sentenceIdx = sentenceIdx;
 
@@ -109,6 +112,29 @@ public abstract class DiscourseTree implements PrettyTreePrinter.Node {
         return res;
     }
 
+    public List<Leaf> getLeaves() {
+        List<Leaf> res = new ArrayList<>();
+
+        if (this instanceof Leaf) {
+            res.add((Leaf) this);
+        } else {
+            // recursion on coordinations
+            if (this instanceof Coordination) {
+                for (DiscourseTree child : ((Coordination) this).getCoordinations()) {
+                    res.addAll(child.getLeaves());
+                }
+            }
+
+            // recursion on superordinations
+            if (this instanceof Subordination) {
+                res.addAll(((Subordination) this).getSuperordination().getLeaves());
+                res.addAll(((Subordination) this).getSubordination().getLeaves());
+            }
+        }
+
+        return res;
+    }
+
     public Optional<DiscourseTree> getPreviousNode() {
         if (parent != null) {
             if (parent instanceof Coordination) {
@@ -135,6 +161,10 @@ public abstract class DiscourseTree implements PrettyTreePrinter.Node {
         return Optional.empty();
     }
 
+    public void addSimpleContext(SimpleContext simpleContext) {
+        simpleContexts.add(simpleContext);
+    }
+
     public void setProcessed() {
         this.processed = true;
     }
@@ -149,6 +179,10 @@ public abstract class DiscourseTree implements PrettyTreePrinter.Node {
 
     public int getSentenceIdx() {
         return sentenceIdx;
+    }
+
+    public List<SimpleContext> getSimpleContexts() {
+        return simpleContexts;
     }
 
     // VISUALIZATION ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,8 @@
 /*
  * ==========================License-Start=============================
- * DiscourseSimplification : NERToken
+ * DiscourseSimplification : MyDiscourseTreeCreator
  *
- * Copyright © 2017 Lambda³
+ * Copyright © 2018 Lambda³
  *
  * GNU General Public License 3
  * This program is free software: you can redistribute it and/or modify
@@ -20,42 +20,21 @@
  * ==========================License-End==============================
  */
 
-package org.lambda3.text.simplification.discourse.utils.ner;
+package org.lambda3.text.simplification.discourse.runner.discourse_tree;
 
-import edu.stanford.nlp.ling.Word;
+import com.typesafe.config.Config;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.SentenceLeaf;
+import org.lambda3.text.simplification.discourse.runner.discourse_tree.model.impl.MySentenceLeaf;
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeException;
 
-/**
- *
- */
-public class NERToken {
-    protected final int index;
-    protected final String text;
-    protected final String category;
+public class MyDiscourseTreeCreator extends DiscourseTreeCreator {
 
-    public NERToken(int index, String text, String category) {
-        this.index = index;
-        this.text = text;
-        this.category = category;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public Word getWord() {
-        return new Word(text);
-    }
-
-    public String getCategory() {
-        return category;
+    public MyDiscourseTreeCreator(Config config) {
+        super(config);
     }
 
     @Override
-    public String toString() {
-        return "(" + index + ": " + category + ", '" + text + "')";
+    public SentenceLeaf createSentenceLeaf(String sentence, int sentenceIdx) throws ParseTreeException {
+        return new MySentenceLeaf(sentence, sentenceIdx);
     }
 }

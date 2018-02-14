@@ -27,9 +27,6 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import edu.stanford.nlp.trees.Tree;
-import org.lambda3.text.simplification.discourse.model.serializer.TreeDeserializer;
-import org.lambda3.text.simplification.discourse.model.serializer.TreeSerializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,9 +39,7 @@ public abstract class Content {
 		MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
 		MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-		// register custom de-/serializers
-		MODULE.addSerializer(Tree.class, new TreeSerializer());
-		MODULE.addDeserializer(Tree.class, new TreeDeserializer());
+		// register custom de-/serializers here
 
 		MAPPER.registerModule(MODULE);
 	}

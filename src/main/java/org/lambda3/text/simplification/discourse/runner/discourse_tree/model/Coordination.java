@@ -22,6 +22,7 @@
 
 package org.lambda3.text.simplification.discourse.runner.discourse_tree.model;
 
+import org.lambda3.text.simplification.discourse.model.SimpleContext;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.Relation;
 import org.lambda3.text.simplification.discourse.utils.PrettyTreePrinter;
 
@@ -38,12 +39,13 @@ public class Coordination extends DiscourseTree {
     private final String cuePhrase; // optional
     private final List<DiscourseTree> coordinations;
 
-    public Coordination(String extractionRule, Relation relation, String cuePhrase, List<DiscourseTree> coordinations) {
+    public Coordination(String extractionRule, Relation relation, String cuePhrase, List<DiscourseTree> coordinations, List<SimpleContext> simpleContexts) {
         super(extractionRule);
         this.relation = relation;
         this.cuePhrase = cuePhrase;
         this.coordinations = new ArrayList<>();
         coordinations.forEach(this::addCoordination);
+        this.simpleContexts = simpleContexts;
     }
 
     public void addCoordination(DiscourseTree coordination) {
@@ -122,7 +124,8 @@ public class Coordination extends DiscourseTree {
     @Override
     public List<String> getPTPCaption() {
         String cuePhraseStr = (cuePhrase != null) ? "'" + cuePhrase + "'" : "NULL";
-        return Collections.singletonList("CO/" + relation + " (" + cuePhraseStr + ", " + extractionRule + ")");
+        String simpleContextsStr = "[" + simpleContexts.stream().map(c -> "'" + c.getText() + "':" + c.getRelation()).collect(Collectors.joining(", ")) + "]";
+        return Collections.singletonList("CO/" + relation + " (" + cuePhraseStr + ", " + extractionRule + ") " + simpleContextsStr);
     }
 
     @Override

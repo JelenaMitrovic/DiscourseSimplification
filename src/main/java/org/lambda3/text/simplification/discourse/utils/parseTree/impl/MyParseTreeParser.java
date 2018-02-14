@@ -1,8 +1,8 @@
 /*
  * ==========================License-Start=============================
- * DiscourseSimplification : TNERString
+ * DiscourseSimplification : MyParseTreeParser
  *
- * Copyright © 2017 Lambda³
+ * Copyright © 2018 Lambda³
  *
  * GNU General Public License 3
  * This program is free software: you can redistribute it and/or modify
@@ -20,27 +20,15 @@
  * ==========================License-End==============================
  */
 
-package org.lambda3.text.simplification.discourse.utils.ner.tner;
+package org.lambda3.text.simplification.discourse.utils.parseTree.impl;
 
-import edu.stanford.nlp.trees.Tree;
-import org.lambda3.text.simplification.discourse.utils.ner.NERString;
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeException;
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeParser;
 
-import java.util.ArrayList;
-import java.util.List;
+public class MyParseTreeParser implements ParseTreeParser<Object> {
 
-/**
- *
- */
-public class TNERString extends NERString {
-    private final Tree parseTree;
-
-    public TNERString(List<TNERToken> tokens, Tree parseTree) {
-        super(new ArrayList<>(tokens));
-        this.parseTree = parseTree;
-        this.tokens.forEach(t -> ((TNERToken) t).setNerString(this));
-    }
-
-    public Tree getParseTree() {
-        return parseTree;
+    @Override
+    public Object parse(String text) throws ParseTreeException {
+        return text;
     }
 }

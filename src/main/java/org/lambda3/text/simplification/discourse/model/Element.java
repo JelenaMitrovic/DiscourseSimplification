@@ -22,12 +22,7 @@
 
 package org.lambda3.text.simplification.discourse.model;
 
-import edu.stanford.nlp.trees.Tree;
 import org.lambda3.text.simplification.discourse.utils.IDGenerator;
-import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeException;
-import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeExtractionUtils;
-import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeParser;
-import org.lambda3.text.simplification.discourse.utils.words.WordsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,28 +32,22 @@ import java.util.List;
  */
 public class Element {
     private String id;
-    private Tree parseTree;
+    private String text;
     private int sentenceIdx;
     private int contextLayer;
     private List<SimpleContext> simpleContexts;
     private List<LinkedContext> linkedContexts;
 
     // for deserialization
-    public Element() {
-    }
+    public Element() {}
 
-    public Element(Tree parseTree, int sentenceIdx, int contextLayer) {
+    public Element(String text, int sentenceIdx, int contextLayer) {
         this.id = IDGenerator.generateUUID();
-        this.parseTree = parseTree;
+        this.text = text;
         this.sentenceIdx = sentenceIdx;
         this.contextLayer = contextLayer;
         this.simpleContexts = new ArrayList<>();
         this.linkedContexts = new ArrayList<>();
-    }
-
-    // not efficient -> prefer to use constructor with tree
-    public Element(String text, int sentenceIdx, int contextLayer) throws ParseTreeException {
-        this(ParseTreeParser.parse(text), sentenceIdx, contextLayer);
     }
 
     public void addLinkedContext(LinkedContext context) {
@@ -77,16 +66,8 @@ public class Element {
         return id;
     }
 
-    public Tree getParseTree() {
-        return parseTree;
-    }
-
-    public void setParseTree(Tree parseTree) {
-        this.parseTree = parseTree;
-    }
-
     public String getText() {
-        return WordsUtils.wordsToString(ParseTreeExtractionUtils.getContainingWords(parseTree));
+        return text;
     }
 
     public int getSentenceIdx() {

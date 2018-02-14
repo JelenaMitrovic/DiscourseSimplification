@@ -1,8 +1,8 @@
 /*
  * ==========================License-Start=============================
- * DiscourseSimplification : PreListNPExtractor
+ * DiscourseSimplification : TmpLeaf
  *
- * Copyright © 2017 Lambda³
+ * Copyright © 2018 Lambda³
  *
  * GNU General Public License 3
  * This program is free software: you can redistribute it and/or modify
@@ -20,14 +20,19 @@
  * ==========================License-End==============================
  */
 
-package org.lambda3.text.simplification.discourse.runner.discourse_tree.extraction.rules.ListNP;
+package org.lambda3.text.simplification.discourse.runner.discourse_tree.model;
 
-/**
- *
- */
-public class PreListNPExtractor extends ListNPExtractor {
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeExtractionUtils;
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeParser;
 
-    public PreListNPExtractor() {
-        super("ROOT <<: (S < (NP=np $.. VP))");
+public class TmpLeaf extends Leaf<Object> {
+    @Override
+    protected ParseTreeParser<Object> getParseTreeParser() {
+        return null;
+    }
+
+    @Override
+    protected ParseTreeExtractionUtils<Object> getParseTreeExtractionUtils() {
+        return null;
     }
 }

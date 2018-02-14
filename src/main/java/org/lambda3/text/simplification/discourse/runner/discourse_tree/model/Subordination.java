@@ -22,12 +22,16 @@
 
 package org.lambda3.text.simplification.discourse.runner.discourse_tree.model;
 
+import org.lambda3.text.simplification.discourse.model.SimpleContext;
 import org.lambda3.text.simplification.discourse.runner.discourse_tree.Relation;
 import org.lambda3.text.simplification.discourse.utils.PrettyTreePrinter;
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeExtractionUtils;
+import org.lambda3.text.simplification.discourse.utils.parseTree.ParseTreeParser;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -39,16 +43,17 @@ public class Subordination extends DiscourseTree {
     private DiscourseTree leftConstituent;
     private DiscourseTree rightConstituent;
 
-    public Subordination(String extractionRule, Relation relation, String cuePhrase, DiscourseTree leftConstituent, DiscourseTree rightConstituent, boolean contextRight) {
+    public Subordination(String extractionRule, Relation relation, String cuePhrase, DiscourseTree leftConstituent, DiscourseTree rightConstituent, boolean contextRight, List<SimpleContext> simpleContexts) {
         super(extractionRule);
         this.relation = relation;
         this.cuePhrase = cuePhrase;
         this.contextRight = contextRight;
 
-        this.leftConstituent = new Leaf(); //tmp
-        this.rightConstituent = new Leaf(); //tmp
+        this.leftConstituent = new TmpLeaf(); //tmp
+        this.rightConstituent = new TmpLeaf(); //tmp
         replaceLeftConstituent(leftConstituent);
         replaceRightConstituent(rightConstituent);
+        this.simpleContexts = simpleContexts;
     }
 
     public void replaceLeftConstituent(DiscourseTree newLeftConstituent) {
@@ -106,7 +111,8 @@ public class Subordination extends DiscourseTree {
     @Override
     public List<String> getPTPCaption() {
         String cuePhraseStr = (cuePhrase != null) ? "'" + cuePhrase + "'" : "NULL";
-        return Collections.singletonList("SUB/" + relation + " (" + cuePhraseStr + ", " + extractionRule + ")");
+        String simpleContextsStr = "[" + simpleContexts.stream().map(c -> "'" + c.getText() + "':" + c.getRelation()).collect(Collectors.joining(", ")) + "]";
+        return Collections.singletonList("SUB/" + relation + " (" + cuePhraseStr + ", " + extractionRule + ") " + simpleContextsStr);
     }
 
     @Override

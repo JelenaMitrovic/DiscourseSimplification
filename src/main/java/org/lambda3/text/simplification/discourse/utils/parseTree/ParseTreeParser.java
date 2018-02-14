@@ -22,35 +22,10 @@
 
 package org.lambda3.text.simplification.discourse.utils.parseTree;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.process.CoreLabelTokenFactory;
-import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.trees.Tree;
-
-import java.io.StringReader;
-import java.util.List;
-
 /**
  *
  */
-public class ParseTreeParser {
+public interface ParseTreeParser<T> {
 
-    private static final TokenizerFactory<CoreLabel> TOKENIZER_FACTORY = PTBTokenizer.factory(new CoreLabelTokenFactory(), "");
-    private static final LexicalizedParser LEX_PARSER = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
-
-    static {
-        LEX_PARSER.setOptionFlags("-outputFormat", "penn,typedDependenciesCollapsed", "-retainTmpSubcategories");
-    }
-
-    public static Tree parse(String text) throws ParseTreeException {
-        List<CoreLabel> rawWords = TOKENIZER_FACTORY.getTokenizer(new StringReader(text)).tokenize();
-        Tree bestParse = LEX_PARSER.parseTree(rawWords);
-        if (bestParse == null) {
-            throw new ParseTreeException(text);
-        }
-
-        return bestParse;
-    }
+    T parse(String text) throws ParseTreeException;
 }
